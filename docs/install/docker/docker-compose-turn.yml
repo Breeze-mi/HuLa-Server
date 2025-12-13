@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  turn:
+    image: coturn/coturn:latest
+    container_name: turnserver
+    restart: always
+    # ⚠️ 核心网络配置：
+    # TURN 服务需要映射大量的 UDP 端口 (49152-65535)。
+    # 使用 host 网络模式 (network_mode: host) 是最简单、最高效的方式，
+    # 它可以让容器直接使用宿主机的网络，避免了手动映射所有端口的麻烦。
+    # ❗ 仅适用于 Linux 宿主机。
+    network_mode: host 
+    user: root
+    # 挂载配置文件
+    volumes:
+      # - ./turn/turnserver.conf:/etc/turnserver.conf:ro
+      - ./turn/turnserver.conf:/etc/coturn/turnserver.conf:ro
+    # 容器启动命令：强制使用挂载的配置文件
+    # command: turnserver -n -c /etc/turnserver.conf
+    entrypoint: 
+      - turnserver
+      - -n
+      - -c
+      - /etc/coturn/turnserver.conf # <-- 使用新的路径
+    environment:
+      - TZ=Asia/Shanghai
